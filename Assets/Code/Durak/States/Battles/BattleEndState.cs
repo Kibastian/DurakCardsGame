@@ -29,7 +29,7 @@ namespace Framework.Durak.States.Battles
 
             board.Clear();
             places.Clear();
-
+            cpass = 0;
             if (deck.IsEmpty)
             {
                 var eliminated = Eliminator.Eliminate(storage.Active);

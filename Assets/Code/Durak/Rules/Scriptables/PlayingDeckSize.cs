@@ -8,7 +8,7 @@ namespace Framework.Durak.Rules.Scriptables
     public class PlayingDeckSize : ScriptableObject, IPlayingDeckSize
     {
         [SerializeField] private int suits = 4;
-        [SerializeField] private int ranks = 13;
+        [SerializeField] private int ranks = 9;
 
         public int Suits => suits;
         public int Ranks => ranks;

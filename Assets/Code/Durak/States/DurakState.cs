@@ -7,7 +7,7 @@ namespace Framework.Durak.States
     public abstract class DurakState : IState
     {
         private readonly IStateMachine<DurakGameState> machine;
-
+        static protected int cpass = 0;
         protected DurakState(IStateMachine<DurakGameState> machine)
         {
             this.machine = machine;

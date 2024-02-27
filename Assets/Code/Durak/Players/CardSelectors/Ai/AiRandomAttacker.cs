@@ -14,11 +14,17 @@ namespace Framework.Durak.Players.Selectors
     {
         private readonly IBoard<Data> board;
         private readonly IMap<ICard, Data> map;
+        private readonly IDeck<Data> deck;
+        private readonly IHand defer;
+        private readonly IHand supper;
 
-        public AiRandomAttacker(IBoard<Data> board, IMap<ICard, Data> map)
+        public AiRandomAttacker(IBoard<Data> board, IMap<ICard, Data> map, IDeck<Data> deck, IHand defer, IHand supper)
         {
             this.board = board;
             this.map = map;
+            this.deck = deck;
+            this.defer = defer;
+            this.supper = supper;
         }
 
         public override ICard GetCard(IReadOnlyList<Data> hand)

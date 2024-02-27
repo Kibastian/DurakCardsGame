@@ -20,6 +20,7 @@ namespace Framework.Shared.Collections
 
         public T Top => datas[indexes.Peek()];
         public T Bottom => datas[indexes.PeekFirst()];
+        public T Left => datas[indexes.Peek()];
 
 
         public Deck(IReadOnlyList<T> datas)

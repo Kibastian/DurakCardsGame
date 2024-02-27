@@ -37,7 +37,7 @@ namespace Framework.Durak.States.Battles
         {
             queue.SetAttackerQueue(
                 attacker: queue.GetNextFrom(queue.Defender),
-                defender: queue.GetNextFrom(queue.Defender, andSkip: 1));
+                defender: queue.GetNextFrom(queue.Defender, andSkip:+1));
         }
     }
 }

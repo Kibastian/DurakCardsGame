@@ -15,10 +15,11 @@ namespace Framework.Durak.Game.EntityCreators
     {
         [SerializeField] private Info top;
         [SerializeField] private Info bottom;
+        [SerializeField] private Info left;
 
         public (IReadOnlyList<IPlayer> players, IMap<Place, ICardOwner> map) Create()
         {
-            var infos = new Info[] { top, bottom };
+            var infos = new Info[] { top, bottom, left };
 
             int count = infos.Length;
 
@@ -50,7 +51,7 @@ namespace Framework.Durak.Game.EntityCreators
 
         public IMap<Place, ICardOwner> CreateMap()
         {
-            var infos = new Info[] { top, bottom };
+            var infos = new Info[] { top, bottom, left };
 
             var map = new Map<Place, ICardOwner>(infos.Length);
 

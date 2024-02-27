@@ -10,5 +10,6 @@ namespace Framework.Shared.Collections
 
         T Top { get; }
         T Bottom { get; }
+        T Left { get; }
     }
 }

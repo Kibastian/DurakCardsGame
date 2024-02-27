@@ -16,6 +16,7 @@ namespace Framework.Durak.States.Actions
     public abstract class PlayerActionState : DurakState
     {
         private readonly int aiWaitDelay = 200;
+        
 
         private readonly IDeck<Data> deck;
         private readonly IBoard<Data> board;
@@ -46,7 +47,7 @@ namespace Framework.Durak.States.Actions
             base.Enter();
 
             UpdatePlayerQueue(queue);
-
+            Debug.Log($"Attacker:{queue.Attacker}, Defender:{queue.Defender}, Current:{queue.Current}");
             Current = queue.Current;
 
             IPlayer player = Current;
@@ -102,10 +103,11 @@ namespace Framework.Durak.States.Actions
 
         private async void OnCardSelected(IPlayer player, ICard card)
         {
+            cpass = 0;
             if (await selection.Handle(card) is false)
             {
                 Log(Current, action: nameof(OnCardSelected), result: false);
-
+                
                 return;
             }
 
@@ -118,18 +120,18 @@ namespace Framework.Durak.States.Actions
             if (board.IsEmpty)
             {
                 Log(Current, action: nameof(OnPass), result: false);
-
+                cpass = 0;
                 return;
             }
-
+            if (queue.Current==queue.Attacker) cpass++;
             Log(Current, action: nameof(OnPass), result: true);
-
             NextState(AfterPass);
         }
 
         private static void Log(IPlayer player, string action, bool result)
         {
             Debug.Log($"Player: {player.Name}. Action[{action}]: {result}");
+            Debug.Log($"Cpass={cpass}");
         }
     }
 }

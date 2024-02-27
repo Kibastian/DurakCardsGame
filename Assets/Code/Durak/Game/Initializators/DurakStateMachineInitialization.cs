@@ -64,6 +64,7 @@ namespace Framework.Durak.Game.Initializators
             machine.DefineTransition<PlayerAttackingState, BattleEndState>(DurakGameState.BattleEnd);
 
             machine.DefineTransition<PlayerAttackingState, BattleDefenderWinnerState>(DurakGameState.BattleDefenderWinner);
+            machine.DefineTransition<PlayerAttackingState, PlayerAttackingState>(DurakGameState.PlayerAttacking);
 
             machine.DefineTransition<OneAttackerTossState, OneAttackerTossState>(DurakGameState.Toss);
             machine.DefineTransition<OneAttackerTossState, BattleAttackerWinnerState>(DurakGameState.BattleAttackerWinner);

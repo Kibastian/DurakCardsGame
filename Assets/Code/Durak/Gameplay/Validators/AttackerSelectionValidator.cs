@@ -52,7 +52,10 @@ namespace Framework.Durak.Validators
             {
                 Debug.Log($"Board does not contais rank: {selected}");
             }
-
+            if (queue.Defender.Hand.Count==0)
+            {   
+                return false;
+            }
             return contains;
         }
 
