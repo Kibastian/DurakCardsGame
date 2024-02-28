@@ -18,7 +18,7 @@ namespace Framework.Durak.Players
         public int Count => collection.Count;
 
         public CardLookSide LookSide => lookSide;
-
+        public int Hash => GetHashCode();
         public Hand(CardLookSide lookSide)
         {
             this.lookSide = lookSide;
@@ -46,12 +46,12 @@ namespace Framework.Durak.Players
         {
             return collection.Contains(data);
         }
-
+        
         public void Clear()
         {
             collection.Clear();
         }
-
+        public object Clone() => MemberwiseClone();
         public IEnumerator<Data> GetEnumerator() => collection.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => collection.GetEnumerator();

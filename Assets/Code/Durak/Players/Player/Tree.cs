@@ -10,7 +10,7 @@ namespace Framework.Durak.Players
     public class Tree
     {
         
-        private List<(Dictionary<Data,int>,double)> collection = new List<(Dictionary<Data, int>, double)>();
+        public List<(Dictionary<Data,int>,double)> collection = new List<(Dictionary<Data, int>, double)>();
 
 
 
@@ -19,10 +19,18 @@ namespace Framework.Durak.Players
             collection.AddRange(datas);
         }
 
+        public void Add((Dictionary<Data, int>, double) datas)
+        {
+            collection.Add(datas);
+        }
+
         public void Clear()
         {
             collection.Clear();
         }
-
+        public bool IsEmpty()
+        {
+            return collection.Count == 0;
+        }
     }
 }

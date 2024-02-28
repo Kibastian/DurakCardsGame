@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Collections;
+using System;
+using System.Linq;
 
 namespace Framework.Shared.Collections.Extensions
 {
@@ -12,7 +15,10 @@ namespace Framework.Shared.Collections.Extensions
         {
             return IListTool.Randomize(list, from: 0, to: list.Count, times) as List<T>;
         }
-
+        public static List<T> Clone<T>(this List<T> listToClone) where T : ICloneable
+        {
+            return listToClone.Select(item => (T)item.Clone()).ToList();
+        }
 
         public static List<int> FillNubers(this List<int> list, int count)
         {

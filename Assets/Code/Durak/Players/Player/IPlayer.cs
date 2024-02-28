@@ -13,5 +13,6 @@ namespace Framework.Durak.Players
         PlayerType Type { get; }
 
         IHand Hand { get; }
+        Tree tree { get; set; }
     }
 }

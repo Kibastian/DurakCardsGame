@@ -1,13 +1,14 @@
 ﻿
 using System.Collections.Generic;
-
+using System.Collections;
+using System;
 using Framework.Durak.Datas;
 using Framework.Shared.Cards.Views;
 
 
 namespace Framework.Durak.Players
 {
-    public interface IHand : IReadOnlyList<Data>
+    public interface IHand : IReadOnlyList<Data>, ICloneable
     {
         CardLookSide LookSide { get; }
 

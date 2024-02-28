@@ -39,6 +39,7 @@ namespace Framework.Durak.Game.EntityCreators
                     Place = info.place,
 
                     Hand = new Hand(info.lookSide),
+                    tree = new Players.Tree()
                 };
 
                 map.Add(player.Place, new CardOwner(info.transform));

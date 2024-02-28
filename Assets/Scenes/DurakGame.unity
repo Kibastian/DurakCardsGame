@@ -3492,7 +3492,7 @@ MonoBehaviour:
     top:
       name: Marta
       type: 0
-      lookSide: 1
+      lookSide: 0
       place: 0
       transform: {fileID: 545756692}
     bottom:
