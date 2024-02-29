@@ -124,20 +124,21 @@ namespace Framework.Durak.Players.Selectors
             //foreach (var e in board.Defends)
             //    defending.Add(e);
             //if (board.Count > 0) passed++;
-            IPlayer doner = Current;
-            if (players.GetNextFrom(players.Defender)==Current)
+            IPlayer doner = new Player();
+            if (players.GetNextFrom(players.Defender) == Current)
             {
-                for (int i = 1; i < 3; i++)
-                    if (players.GetNextFrom(players.Defender, andSkip: i).Type == PlayerType.Ai)
+                for (int i = 0; i < 3; i++)
+                    if (players.GetNextFrom(players.Defender, andSkip: i).Type == PlayerType.Ai&& players.GetNextFrom(players.Defender, andSkip: i)!=players.Current)
                         doner = players.GetNextFrom(players.Defender, andSkip: i);
             }
-            if (Current.tree.IsEmpty())
+            else if (Current.tree.IsEmpty())
             {
                 //hands = new List<IHand>(){ (IHand)(Current.Hand).Clone(),  (IHand)supper.Clone(), (IHand)defer.Clone() };
                 //TreeConstruct(0, 0);
                 Current.tree = new Tree(board, map, deck, players);
                 doner = Current;
             }
+            else doner = Current;
             var turn = doner.tree.BestTurn();
             if (turn == new Data(-1, -1)) return default;
             else return map.Get(turn);

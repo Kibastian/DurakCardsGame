@@ -133,6 +133,7 @@ namespace Framework.Durak.States.Actions
             foreach (var e in storage)
             {
                 if (e.tree.IsEmpty()) continue;
+                if (!e.tree.collection[e.tree.node].ContainsKey(new Data(-1, -1))) continue;
                 e.tree.node = e.tree.collection[e.tree.node][new Data(-1,-1)];
             }
             if (queue.Current==queue.Attacker) cpass++;
