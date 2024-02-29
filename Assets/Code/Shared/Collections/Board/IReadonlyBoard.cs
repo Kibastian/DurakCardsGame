@@ -7,7 +7,7 @@ namespace Framework.Shared.Collections
         IReadOnlyList<T> All { get; }
         IReadOnlyList<T> Attacks { get; }
         IReadOnlyList<T> Defends { get; }
-
+        IReadOnlyList<T> Seen { get; }
         bool IsAttacksPlace { get; }
         bool IsDefendsPlace { get; }
 

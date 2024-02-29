@@ -9,6 +9,7 @@ namespace Framework.Shared.Collections
     {
         private readonly List<T> all;
         private readonly List<T>[] places;
+        private readonly List<T> seen;
 
         private readonly int rowItemsCount;
 
@@ -17,6 +18,7 @@ namespace Framework.Shared.Collections
         public IReadOnlyList<T> All => all;
         public IReadOnlyList<T> Attacks => places[BoardIndexes.attacks];
         public IReadOnlyList<T> Defends => places[BoardIndexes.defends];
+        public IReadOnlyList<T> Seen => seen;
 
         public bool IsAttacksPlace => index == BoardIndexes.attacks;
         public bool IsDefendsPlace => index == BoardIndexes.defends;
@@ -33,7 +35,7 @@ namespace Framework.Shared.Collections
         {
             all = new List<T>(rowItemsCount * BoardIndexes.count);
             places = new List<T>[BoardIndexes.count];
-
+            seen = new List<T>();
             this.rowItemsCount = rowItemsCount;
 
             for (int i = 0; i < BoardIndexes.count; i++)
@@ -87,6 +89,14 @@ namespace Framework.Shared.Collections
             index = 0;
         }
 
+        public void AddSeen(T item)
+        {
+            seen.Add(item);
+        }
+        public void RemoveSeen(T item)
+        {
+            seen.Remove(item);
+        }
         public List<T>.Enumerator GetEnumerator() => all.GetEnumerator();
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => all.GetEnumerator();

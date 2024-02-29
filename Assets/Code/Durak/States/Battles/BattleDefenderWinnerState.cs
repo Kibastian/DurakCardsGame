@@ -16,18 +16,22 @@ namespace Framework.Durak.States.Battles
     {
         private readonly IDiscardPile discardPile;
         private readonly IDiscardPileCardMovement movement;
-
+        private readonly IBoard<Data> board;
         public BattleDefenderWinnerState(IStateMachine<DurakGameState> machine, IPlayerQueue<IPlayer> queue, IBoard<Data> board, IDiscardPile discardPile, IDiscardPileCardMovement movement)
             : base(machine, board, queue)
         {
             this.discardPile = discardPile;
             this.movement = movement;
+            this.board = board;
         }
 
         protected override UniTask MoveCards(IReadOnlyList<Data> datas)
         {
             discardPile.AddRange(datas);
-
+            foreach (var e in datas)
+            {
+                board.RemoveSeen(e);
+            }
             return movement.MoveTo(datas);
 
         }

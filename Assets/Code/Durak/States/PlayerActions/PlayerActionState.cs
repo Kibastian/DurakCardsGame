@@ -7,6 +7,7 @@ using Framework.Durak.Players;
 using Framework.Durak.Players.Selectors;
 using Framework.Shared.Cards.Entities;
 using Framework.Shared.Collections;
+using Framework.Shared.Collections.Extensions;
 using Framework.Shared.States;
 
 using UnityEngine;
@@ -22,6 +23,7 @@ namespace Framework.Durak.States.Actions
         private readonly IBoard<Data> board;
         private readonly IPlayerStorage<IPlayer> storage;
         private readonly IPlayerQueue<IPlayer> queue;
+        private readonly IMap<ICard, Data> map;
 
         private readonly IReadonlyIndexer<PlayerType, ISelectorsGroup> selectorsIndexer;
         private readonly ICardSelectionHandler selection;
@@ -31,7 +33,7 @@ namespace Framework.Durak.States.Actions
 
         protected IPlayer Current { get; private set; }
 
-        protected PlayerActionState(IStateMachine<DurakGameState> machine, IDeck<Data> deck, IBoard<Data> board, IPlayerStorage<IPlayer> storage, IPlayerQueue<IPlayer> queue, IReadonlyIndexer<PlayerType, ISelectorsGroup> selectorsIndexer, ICardSelectionHandler selection)
+        protected PlayerActionState(IStateMachine<DurakGameState> machine, IDeck<Data> deck, IBoard<Data> board, IPlayerStorage<IPlayer> storage, IPlayerQueue<IPlayer> queue, IReadonlyIndexer<PlayerType, ISelectorsGroup> selectorsIndexer, ICardSelectionHandler selection, IMap<ICard, Data> map)
             : base(machine)
         {
             this.deck = deck;
@@ -40,6 +42,7 @@ namespace Framework.Durak.States.Actions
             this.queue = queue;
             this.selectorsIndexer = selectorsIndexer;
             this.selection = selection;
+            this.map = map;
         }
 
         public sealed override async void Enter()
@@ -112,7 +115,11 @@ namespace Framework.Durak.States.Actions
             }
 
             Log(Current, action: nameof(OnCardSelected), result: true);
-
+            foreach (var e in storage)
+            {
+                if (e.tree.IsEmpty()) continue;
+                e.tree.node = e.tree.collection[e.tree.node][map.Get(card)];
+            }
             NextState(AfterCardSelected);
         }
         private void OnPass(IPlayer player)
@@ -122,6 +129,11 @@ namespace Framework.Durak.States.Actions
                 Log(Current, action: nameof(OnPass), result: false);
                 cpass = 0;
                 return;
+            }
+            foreach (var e in storage)
+            {
+                if (e.tree.IsEmpty()) continue;
+                e.tree.node = e.tree.collection[e.tree.node][new Data(-1,-1)];
             }
             if (queue.Current==queue.Attacker) cpass++;
             Log(Current, action: nameof(OnPass), result: true);

@@ -15,33 +15,53 @@ namespace Framework.Durak.Players.Selectors
         private readonly IDeck<Data> deck;
         private readonly IBoard<Data> board;
         private readonly IMap<ICard, Data> map;
+        IPlayerQueue<IPlayer> players;
 
-        public AiRandomDefender(IDeck<Data> deck, IBoard<Data> board, IMap<ICard, Data> map)
+        public AiRandomDefender(IDeck<Data> deck, IBoard<Data> board, IMap<ICard, Data> map, IPlayerQueue<IPlayer> players)
         {
             this.deck = deck;
             this.board = board;
             this.map = map;
+            this.players = players;
         }
 
         public override ICard GetCard(IReadOnlyList<Data> hand)
         {
-            Data trump = deck.Bottom;
-
-            Data last = board.Last();
-
-            Assert.IsFalse(board.IsEmpty, "In defending state the board can't be empty");
-
-            foreach (var data in hand)
+            IPlayer doner = Current;
+            if (players.GetNextFrom(players.Defender) == Current)
             {
-                if (data.CanBeat(last, trump))
-                {
-                    ICard card = map.Get(data);
-
-                    return card;
-                }
+                for (int i = 1; i < 3; i++)
+                    if (players.GetNextFrom(players.Defender, andSkip: i).Type == PlayerType.Ai)
+                        doner = players.GetNextFrom(players.Defender, andSkip: i);
             }
+            if (Current.tree.IsEmpty())
+            {
+                //hands = new List<IHand>(){ (IHand)(Current.Hand).Clone(),  (IHand)supper.Clone(), (IHand)defer.Clone() };
+                //TreeConstruct(0, 0);
+                Current.tree = new Tree(board, map, deck, players);
+                doner = Current;
+            }
+            var turn = doner.tree.BestTurn();
+            if (turn == new Data(-1, -1)) return default;
+            else return map.Get(turn);
 
-            return default;
+            //Data trump = deck.Bottom;
+
+            //Data last = board.Last();
+
+            //Assert.IsFalse(board.IsEmpty, "In defending state the board can't be empty");
+
+            //foreach (var data in hand)
+            //{
+            //    if (data.CanBeat(last, trump))
+            //    {
+            //        ICard card = map.Get(data);
+
+            //        return card;
+            //    }
+            //}
+
+            //return default;
         }
     }
 }

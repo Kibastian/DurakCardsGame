@@ -3,23 +3,254 @@ using System;
 using System.Collections;
 using System.Collections.Generic;       
 using Framework.Durak.Datas;
+using System.Linq;
+using Framework.Durak.Collections.Extensions;
+using Framework.Durak.Datas.Extensions;
+using Framework.Shared.Cards.Entities;
+using Framework.Shared.Collections;
+using Framework.Shared.Collections.Extensions;
 
 namespace Framework.Durak.Players
 {
     [Serializable]
     public class Tree
     {
+        private readonly IBoard<Data> board;
+        private readonly IMap<ICard, Data> map;
+        private readonly IDeck<Data> deck;
+        private readonly IHand attacker;
+        private readonly IHand defer;
+        private readonly IHand supper;
+        IPlayerQueue<IPlayer> players;
+        List<Data>[] turns = new List<Data>[3] { new List<Data>(), new List<Data>(), new List<Data>() };
+        private List<Data> attacking = new List<Data>();
+        private List<Data> defending = new List<Data>();
+        private List<IHand> hands = new List<IHand>();
+        private IHand realHand;
+        public int node;
+        private int ix;
+        private int passed = 0;
+        private int cur = 0;
+        private bool toss = false;
+        public List<Dictionary<Data, int>> collection = new List<Dictionary<Data, int>>();
+        public List<double> ans = new List<double>();
+        public Tree()
+        {
+
+        }
         
-        public List<(Dictionary<Data,int>,double)> collection = new List<(Dictionary<Data, int>, double)>();
+        public Tree(IBoard<Data> board, IMap<ICard, Data> map, IDeck<Data> deck, IPlayerQueue<IPlayer> players)
+        {
+            node = 0;
+            this.board = board;
+            this.map = map;
+            this.deck = deck;
+            this.players = players;
+            this.attacker = players.Attacker.Hand;
+            this.defer = players.Defender.Hand;
+            for (int i = 0; i < 3; i++)
+                if (players.GetNextFrom(players.Defender, andSkip: i).Type == PlayerType.Real)
+                    realHand = players.GetNextFrom(players.Defender, andSkip: i).Hand;
+            this.supper = players.GetNextFrom(players.Defender, andSkip: (players.GetNextFrom(players.Defender) == players.Attacker) ? 1 : 0).Hand;
+            foreach (var e in board.Attacks)
+                attacking.Add(e);
+            foreach (var e in board.Defends)
+                defending.Add(e);
+            if (board.Count > 0) passed++;
+            hands = new List<IHand>() { (IHand)(attacker).Clone(), (IHand)supper.Clone(), (IHand)defer.Clone() };
+            for (int i = 0; i < 3; i++)
+                if (hands[i] == realHand) ix = i;
+            TreeConstruct(0, (players.Current == players.Defender) ? 2 : 0);
+        }
+        private double Desire(Data card, int who)
+        {
+            int freq = 1;
+            if (card == new Data(-1, -1))
+            {
+                return 2.3 * Math.Pow(0.958, 34 - deck.Count()) * Math.Pow(0.856, board.Count() - 1);
+            }
+            if (who==2)
+            {
+                foreach (var e in board.Seen)
+                    if (e.rank == card.rank && e.suit != card.suit) freq++;
+            }
+            return 3 * Math.Pow(0.957, card.rank)/4;
+        }
+        private Dictionary<Data,double> Pos(List<Data> cards, int who)
+        {
+            Dictionary<Data, double> pos = new Dictionary<Data, double>();
+            foreach (var e in cards)
+                pos[e]=Desire(e, who);
+            pos[new Data(-1,-1)]=Desire(new Data(-1, -1),who);
+            double sum = pos.Values.Sum();
+            foreach (var e in cards)
+                pos[e] = pos[e] / sum;
+            pos[new Data(-1, -1)] = pos[new Data(-1, -1)] / sum;
+            return pos;
+        }
+        public Data BestTurn()
+        {
+            Data card = new Data(-1, -1);
+            double res = -10;
+            foreach (var e in collection[node].Keys)
+            {
+                if (collection[node][e]>res)
+                {
+                    card = e;
+                    res = collection[node][e];
+                }
+            }
+            return card;
+        }
+        private double TreeConstruct(int i, int who)
+        {
+            this.Add(new Dictionary<Data, int>());
+            ans.Add(0.0);
+            var tmp = passed;
+            List<Data> temp = new List<Data>();
+            foreach (var e in hands[who])
+            {
+                if (attacking.Contains(e) || defending.Contains(e)) continue;
+                else temp.Add(e);
+            }
+            var possibilities = Pos(temp,who);
+            foreach (var e in hands[who])
+            {
+                if (attacking.Contains(e) || defending.Contains(e)) continue;
+                if (Validate(who, e))
+                {
+                    turns[who].Add(e);
+                    passed = 0;
+                    this.collection[i][e] = this.collection.Count;
+                    if (who < 2) attacking.Add(e);
+                    else defending.Add(e);
+                    var tump = TreeConstruct(this.collection.Count, ((!toss)&&(who < 2)) ? 2 : cur);
+                    if (who < 2) attacking.Remove(e);
+                    else defending.Remove(e);
+                    turns[who].Remove(e);
+                    if (who == ix)
+                    {
+                        ans[i] += tump * possibilities[e];
+                    }
+                    else ans[i] = Math.Max(ans[i], tump);
+                }
+            }
+            passed = tmp;
+            if (attacking.Count == 0) return ans[i];
+            if (who == 2)
+            {
+                this.collection[i][new Data(-1,-1)] = this.collection.Count;
+                toss = true;
+                var tump = TreeConstruct(this.collection.Count, cur);
+                if (who == ix)
+                {
+                    ans[i] += tump * possibilities[new Data(-1,-1)];
+                }
+                else ans[i] = Math.Max(ans[i], tump);
+                toss = false;
+                return ans[i];
+            }
+            passed++;
+            if (passed == 2)
+            {
+                passed--;
+                int idx = 0;
+                double s = 0;
+                double[] scores = new double[3];
+                for (int j = 0; j < 3; j++)
+                {
+                    scores[j] = Score(j, ref idx);
+                    s += scores[j];
+                }
+                s -= 2*scores[ix];
+                return s;
+            }
+            this.collection[i][new Data(-1,-1)] = this.collection.Count;
+            
+            cur = (cur + 1) % 2;
+            double tamp = TreeConstruct(this.collection.Count, cur);
+            if (who == ix)
+            {
+                ans[i] += tamp * possibilities[new Data(-1, -1)];
+            }
+            else ans[i] = Math.Max(ans[i], tamp);
+            passed--;
+            cur = (cur + 1) % 2;
+            return ans[i];
+        }
+        private double Score(int i, ref int idx)
+        {
+            double sum = 0;
+            if (i==2&&toss)
+            {
+                foreach (var e in hands[i])
+                    sum += e.rank + ((e.suit == deck.Bottom.suit) ? 13 : 0);
+                foreach (var e in attacking)
+                    sum += e.rank + ((e.suit == deck.Bottom.suit) ? 13 : 0);
+                return sum / (hands[i].Count() + attacking.Count());
+            }
+            var slice = deck.ToList().GetRange(idx, Math.Max(0, 6 - turns[i].Count()));
+            idx += Math.Max(0, 6 - turns[i].Count());
+            
+            foreach (var e in hands[i])
+                sum += e.rank + ((e.suit == deck.Bottom.suit) ? 13 : 0);
+            foreach (var e in slice)
+                sum += e.rank + ((e.suit == deck.Bottom.suit) ? 13 : 0);
+            foreach (var e in turns[i])
+                sum -= e.rank + ((e.suit == deck.Bottom.suit) ? 13 : 0);
+            sum /= Math.Max(6, hands[i].Count() - turns[i].Count());
+            return sum;
+        }
+        private bool ContainsRank(Data data)
+        {
+            foreach (var item in attacking)
+            {
+                if (item.EqualRank(data))
+                {
+                    return true;
+                }
+            }
+            foreach (var item in defending)
+            {
+                if (item.EqualRank(data))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        private bool Validate(int who, Data data)
+        {
+            if (who < 2)
+            {
+                if (attacking.Count == 0)
+                {
+                    return true;
+                }
 
+                if (attacking.Count < 6 && ContainsRank(data))
+                {
+                    return true;
+                }
+                return false;
+            }
+            else
+            {
+                Data trump = deck.Bottom;
 
+                Data last = attacking.Last();
+                if (data.CanBeat(last, trump)) return true;
+                else return false;
+            }
+        }
+        
 
-        public void AddRange(List<(Dictionary<Data, int>, double)> datas)
+        public void AddRange(List<Dictionary<Data, int>> datas)
         {
             collection.AddRange(datas);
         }
 
-        public void Add((Dictionary<Data, int>, double) datas)
+        public void Add(Dictionary<Data, int> datas)
         {
             collection.Add(datas);
         }

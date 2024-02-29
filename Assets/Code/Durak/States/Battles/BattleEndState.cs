@@ -26,7 +26,10 @@ namespace Framework.Durak.States.Battles
         public override void Enter()
         {
             base.Enter();
-
+            foreach (var player in storage)
+            {
+                player.tree.Clear();
+            }
             board.Clear();
             places.Clear();
             cpass = 0;

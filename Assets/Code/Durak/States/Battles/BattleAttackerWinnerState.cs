@@ -16,12 +16,14 @@ namespace Framework.Durak.States.Battles
     {
         private readonly IPlayerQueue<IPlayer> queue;
         private readonly IPlayerCardMovement movement;
+        private readonly IBoard<Data> board;
 
         public BattleAttackerWinnerState(IStateMachine<DurakGameState> machine, IPlayerQueue<IPlayer> queue, IBoard<Data> board, IPlayerCardMovement movement)
             : base(machine, board, queue)
         {
             this.queue = queue;
             this.movement = movement;
+            this.board = board;
         }
 
         protected override async UniTask MoveCards(IReadOnlyList<Data> datas)
@@ -31,6 +33,8 @@ namespace Framework.Durak.States.Battles
             defender.Hand.AddRange(datas);
 
             await movement.MoveTo(defender, datas);
+            foreach (var e in datas)
+                board.AddSeen(e);
         }
 
         protected override void UpdatePlayerQueue(IPlayerQueue<IPlayer> queue)
