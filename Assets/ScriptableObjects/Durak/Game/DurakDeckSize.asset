@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: DurakDeckSize
   m_EditorClassIdentifier: 
   suits: 4
-  ranks: 13
+  ranks: 9

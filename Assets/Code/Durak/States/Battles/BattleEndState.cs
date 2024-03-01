@@ -30,8 +30,7 @@ namespace Framework.Durak.States.Battles
             {
                 player.tree.Clear();
             }
-            board.Clear();
-            places.Clear();
+            
             cpass = 0;
             if (deck.IsEmpty)
             {

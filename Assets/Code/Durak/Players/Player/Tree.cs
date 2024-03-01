@@ -54,10 +54,16 @@ namespace Framework.Durak.Players
                     realHand = players.GetNextFrom(players.Defender, andSkip: i).Hand;
             this.supper = players.GetNextFrom(players.Defender, andSkip: (players.GetNextFrom(players.Defender) == players.Attacker) ? 1 : 0).Hand;
             foreach (var e in board.Attacks)
+            {
                 attacking.Add(e);
+                turns[0].Add(e);
+            }
             foreach (var e in board.Defends)
+            {
                 defending.Add(e);
             if (board.Count > 0) passed++;
+            }
+            //if (board.Count > 0) passed++;
             hands = new List<IHand>() { (IHand)(attacker), (IHand)supper, (IHand)defer };
             for (int i = 0; i < 3; i++)
                 if (hands[i] == realHand) ix = i;
@@ -68,14 +74,14 @@ namespace Framework.Durak.Players
             int freq = 1;
             if (card == new Data(-1, -1))
             {
-                return 2.3 * Math.Pow(0.958, 34 - deck.Count()) * Math.Pow(0.856, board.Count() - 1);
+                return 1.75 * Math.Pow(0.978, 18 - deck.Count()) * Math.Pow(0.922, board.Count() - 1);
             }
             if (who==2)
             {
                 foreach (var e in board.Seen)
                     if (e.rank == card.rank && e.suit != card.suit) freq++;
             }
-            return 3 * Math.Pow(0.957, card.rank)/freq;
+            return 4 * Math.Pow(0.921, card.rank + ((card.suit == deck.Bottom.suit) ? 9 : 0)) /freq;
         }
         private Dictionary<Data,double> Pos(List<Data> cards, int who)
         {
@@ -93,12 +99,12 @@ namespace Framework.Durak.Players
         {
             Data card = new Data(-1, -1);
             double res = -10;
-            foreach (var e in collection[node].Keys)
+            foreach (var e in collection[node])
             {
-                if (collection[node][e]>res)
+                if (ans[e.Value]>res)
                 {
-                    card = e;
-                    res = collection[node][e];
+                    card = e.Key;
+                    res = ans[e.Value];
                 }
             }
             return card;
@@ -175,14 +181,14 @@ namespace Framework.Durak.Players
             {
                 passed--;
                 int idx = 0;
-                double s = 0;
+                double s = 1;
                 double[] scores = new double[3];
                 for (int j = 0; j < 3; j++)
                 {
                     scores[j] = Score(j, ref idx);
-                    s += scores[j];
+                    s *= scores[j];
                 }
-                s -= 2*scores[ix];
+                s /= scores[ix]*scores[ix];
                 ans[i] = s;
                 return ans[i];
             }
@@ -192,6 +198,11 @@ namespace Framework.Durak.Players
             double tamp = TreeConstruct(this.collection.Count, cur);
             if (who == ix)
             {
+                if(flag)
+                        {
+                    ans[i] = 0.0;
+                    flag = false;
+                }
                 ans[i] += tamp * possibilities[new Data(-1, -1)];
             }
             else ans[i] = Math.Max(ans[i], tamp);
@@ -205,25 +216,28 @@ namespace Framework.Durak.Players
         }
         private double Score(int i, ref int idx)
         {
+     
             double sum = 0;
             if (i==2&&toss)
             {
                 foreach (var e in hands[i])
-                    sum += e.rank + ((e.suit == deck.Bottom.suit) ? 13 : 0);
+                    sum += 4 * Math.Pow(0.921, 17-(e.rank + ((e.suit == deck.Bottom.suit) ? 11 : 0)));
                 foreach (var e in attacking)
-                    sum += e.rank + ((e.suit == deck.Bottom.suit) ? 13 : 0);
+                    sum += 4 * Math.Pow(0.921, 17 - (e.rank + ((e.suit == deck.Bottom.suit) ? 11 : 0)));
                 return sum / (hands[i].Count() + attacking.Count());
             }
-            var slice = deck.ToList().GetRange(idx, 6-Math.Min(6, hands[i].Count() - turns[i].Count()));
-            idx += 6 - Math.Min(6, hands[i].Count() - turns[i].Count());
-            
+            var totake = Math.Min(deck.Count() - idx, 6 - Math.Min(6, hands[i].Count() + ((i == ix) ? board.Count() : 0) - turns[i].Count()));
+            var slice = deck.ToList().GetRange(deck.Count()-idx-totake, Math.Min(deck.Count()-idx,6-Math.Min(6, hands[i].Count() + ((i==ix)?board.Count():0) - turns[i].Count())));
+            idx += totake;
+
             foreach (var e in hands[i])
-                sum += e.rank + ((e.suit == deck.Bottom.suit) ? 13 : 0);
+                sum += 4 * Math.Pow(0.921, 17 - (e.rank + ((e.suit == deck.Bottom.suit) ? 11 : 0)));
             foreach (var e in slice)
-                sum += e.rank + ((e.suit == deck.Bottom.suit) ? 13 : 0);
+                sum += 4 * Math.Pow(0.921, 17 - (e.rank + ((e.suit == deck.Bottom.suit) ? 11 : 0)));
             foreach (var e in turns[i])
-                sum -= e.rank + ((e.suit == deck.Bottom.suit) ? 13 : 0);
-            sum /= Math.Max(6, hands[i].Count() - turns[i].Count());
+                sum -= 4 * Math.Pow(0.921, 17 - (e.rank + ((e.suit == deck.Bottom.suit) ? 11 : 0)));
+            if (hands[i].Count() - turns[i].Count() + totake < 2) return 1000;
+            sum /= Math.Pow((hands[i].Count() - turns[i].Count()+ totake),1-0.028*deck.Count());
             return sum;
         }
         private bool ContainsRank(Data data)

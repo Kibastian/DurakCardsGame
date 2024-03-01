@@ -8,7 +8,8 @@ using Framework.Durak.Players;
 using Framework.Durak.Services.Movements;
 using Framework.Shared.Collections;
 using Framework.Shared.States;
-
+using UnityEngine;
+using Framework.Durak.Gameplay;
 
 namespace Framework.Durak.States.Battles
 {
@@ -17,9 +18,11 @@ namespace Framework.Durak.States.Battles
         private readonly IPlayerQueue<IPlayer> queue;
         private readonly IPlayerCardMovement movement;
         private readonly IBoard<Data> board;
+        private readonly IPlaces<Transform> places;
+            private readonly ICardDealer dealer;
 
-        public BattleAttackerWinnerState(IStateMachine<DurakGameState> machine, IPlayerQueue<IPlayer> queue, IBoard<Data> board, IPlayerCardMovement movement)
-            : base(machine, board, queue)
+        public BattleAttackerWinnerState(IStateMachine<DurakGameState> machine, IPlayerQueue<IPlayer> queue, IBoard<Data> board, IPlayerCardMovement movement, IPlaces<Transform> places, ICardDealer dealer)
+            : base(machine, board, queue, places, dealer)
         {
             this.queue = queue;
             this.movement = movement;

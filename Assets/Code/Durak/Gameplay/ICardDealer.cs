@@ -6,5 +6,6 @@ namespace Framework.Durak.Gameplay
     public interface ICardDealer
     {
         UniTask DealCard();
+        UniTask DealoCard();
     }
 }
