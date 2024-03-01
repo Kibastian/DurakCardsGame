@@ -61,7 +61,7 @@ namespace Framework.Durak.Players
             foreach (var e in board.Defends)
             {
                 defending.Add(e);
-            if (board.Count > 0) passed++;
+                turns[2].Add(e);
             }
             //if (board.Count > 0) passed++;
             hands = new List<IHand>() { (IHand)(attacker), (IHand)supper, (IHand)defer };
