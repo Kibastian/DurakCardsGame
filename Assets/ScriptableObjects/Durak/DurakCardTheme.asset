@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f87051550c5c6b45961acf02a599448, type: 3}
   m_Name: DurakCardTheme
   m_EditorClassIdentifier: 
-  faces: {fileID: 11400000, guid: 6a9cb22103a05ec469ed67012e2575e5, type: 2}
+  faces: {fileID: 11400000, guid: 47d4d596cd89f4a9a8be453596c8f566, type: 2}
   backs: {fileID: 11400000, guid: ba4662d3d01c1dc4ebc39ffa99f73f09, type: 2}
   backIndex: 0

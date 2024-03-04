@@ -9,7 +9,7 @@ using Framework.Durak.Datas.Extensions;
 using Framework.Shared.Cards.Entities;
 using Framework.Shared.Collections;
 using Framework.Shared.Collections.Extensions;
-using System.Diagnostics;
+using UnityEngine;
 
 namespace Framework.Durak.Players
 {
@@ -107,12 +107,28 @@ namespace Framework.Durak.Players
                     res = ans[e.Value];
                 }
             }
+            Debug.Log(collection[node].Select(x=>x.ToString()).Aggregate((x,y)=>x+","+y));
+            Debug.Log(collection[node].Select(x => ans[x.Value].ToString()).ToList().Aggregate((x,y)=>x+" ,"+y));
             return card;
         }
         private double TreeConstruct(int i, int who)
         {
             this.Add(new Dictionary<Data, int>());
             ans.Add(-300.0);
+            if (passed == 2)
+            {
+                int idx = 0;
+                double s = 0;
+                double[] scores = new double[3];
+                for (int j = 0; j < 3; j++)
+                {
+                    scores[j] = Score(j, ref idx);
+                    s += scores[j];
+                }
+                s -= 3 * scores[ix];
+                ans[i] = s;
+                return ans[i];
+            }
             bool flag = true;
             var tmp = 0;
             if (tmp != passed) tmp++;
@@ -177,21 +193,7 @@ namespace Framework.Durak.Players
                 return ans[i];
             }
             passed++;
-            if (passed == 2)
-            {
-                passed--;
-                int idx = 0;
-                double s = 1;
-                double[] scores = new double[3];
-                for (int j = 0; j < 3; j++)
-                {
-                    scores[j] = Score(j, ref idx);
-                    s *= scores[j];
-                }
-                s /= scores[ix]*scores[ix];
-                ans[i] = s;
-                return ans[i];
-            }
+            
             this.collection[i][new Data(-1,-1)] = this.collection.Count;
             
             cur = (cur + 1) % 2;
@@ -237,7 +239,7 @@ namespace Framework.Durak.Players
             foreach (var e in turns[i])
                 sum -= 4 * Math.Pow(0.921, 17 - (e.rank + ((e.suit == deck.Bottom.suit) ? 11 : 0)));
             if (hands[i].Count() - turns[i].Count() + totake < 2) return 1000;
-            sum /= Math.Pow((hands[i].Count() - turns[i].Count()+ totake),1-0.028*deck.Count());
+            sum /= Math.Pow((hands[i].Count() - turns[i].Count()+ totake),2-0.056*deck.Count());
             return sum;
         }
         private bool ContainsRank(Data data)
